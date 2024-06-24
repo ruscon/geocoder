@@ -7,4 +7,9 @@ export interface GoogleMapsQueryInterface {
      */
     region?: string;
     language: string;
+    /**
+     * Signature for signed request to Google Maps API to bypass the 25k requests/day limit
+     * https://developers.google.com/maps/documentation/maps-static/digital-signature#server-side-signing
+     */
+    signature?: string;
 }

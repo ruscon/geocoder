@@ -3,17 +3,18 @@ import { GeocodeCommand } from '../../../command';
 import type { GeocodeQuery } from '../../../model';
 import type { GoogleMapsGeocodeQueryInterface } from '../interface';
 import { GoogleMapsLocationCommandMixin } from './mixin';
+import { urlSign } from '../../../util/url-signing';
 
 /**
  * @link {https://developers.google.com/maps/documentation/geocoding/intro#GeocodingRequests}
  */
 export class GoogleMapsGeocodeCommand extends GoogleMapsLocationCommandMixin(GeocodeCommand)<GoogleMapsGeocodeQueryInterface> {
-    constructor(httpClient: AxiosInstance, private readonly apiKey: string) {
-        super(httpClient, apiKey);
+    constructor(httpClient: AxiosInstance, private readonly apiKey: string, private readonly secret?: string) {
+        super(httpClient, apiKey, secret);
     }
 
     static getUrl(): string {
-        return 'https://maps.googleapis.com/maps/api/geocode/json';
+        return 'https://maps.googleapis.com/maps/api/geocode/json'
     }
 
     protected async buildQuery(query: GeocodeQuery): Promise<GoogleMapsGeocodeQueryInterface> {
@@ -44,6 +45,10 @@ export class GoogleMapsGeocodeCommand extends GoogleMapsLocationCommandMixin(Geo
 
         if (query.countryCode) {
             providerQuery.region = `.${query.countryCode.toLowerCase()}`;
+        }
+
+        if (this.secret) {
+            providerQuery.signature = urlSign('/maps/api/geocode/json', providerQuery, this.secret);
         }
 
         return providerQuery;
